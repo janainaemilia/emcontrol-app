@@ -6,7 +6,16 @@ import { bindActionCreators } from 'redux'
 import { reduxForm, Field } from 'redux-form'
 import { withRouter } from 'react-router-dom'
 
-import { editar, getCategorias, getSubcategorias, buscarEquipamento } from '../actions/equipamentoActions'
+import { editar, getCategorias, getSubcategorias, buscarEquipamento, saveToServer } from '../actions/equipamentoActions'
+
+import FormControl from '@material-ui/core/FormControl'
+import InputLabel from '@material-ui/core/InputLabel'
+
+import { FilePond, registerPlugin } from 'react-filepond'
+import 'filepond/dist/filepond.min.css'
+
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import FormGroup from '@material-ui/core/FormGroup'
@@ -92,7 +101,7 @@ class EditarEquipamento extends Component {
 	constructor(props) {
         super(props)
 
-        this.state = { categoria: null, subcategoria: null, subcategorias: [], equipamento: null }
+        this.state = { categoria: null, subcategoria: null, subcategorias: [], equipamento: null, numeroPatrimonio: null, dados: null }
 
         this.routeChange = this.routeChange.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
@@ -110,7 +119,16 @@ class EditarEquipamento extends Component {
     }
 
     onSubmit(values) {
+        this.setState({ ...this.state, dados: values, numeroPatrimonio: values.numeroPatrimonio })
         this.props.editar(values)
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(nextProps.equipamento != null && nextProps.submitSucceeded){            
+            console.log(nextProps.equipamento.equipamento.numeroPatrimonio)
+            this.saveImages(nextProps.equipamento.equipamento.numeroPatrimonio)
+            this.setState({ submit: false })
+        }
     }
     
     routeChange(route){
@@ -139,7 +157,45 @@ class EditarEquipamento extends Component {
         this.props.change('subcategoria', obj)
         this.setState({ ...state, subcategoria: obj })
     }
-	
+    
+    handleFiles(files){
+        this.setState({
+            files: files.map(fileItem => fileItem.file)
+        })
+    }
+
+    saveImages(numeroPatrimonio){
+        let files = this.state.files
+        console.log("numeroPatrimonio", numeroPatrimonio)
+
+        files.forEach(file => {
+            this.getBase64(file, numeroPatrimonio)
+        })
+    }
+    
+    getBase64(file, numeroPatrimonio) {
+        let props = this.props
+        let date = new Date()
+        
+        var reader = new FileReader()
+        reader.readAsDataURL(file)
+    
+        reader.onload = function () {
+            let base64 = reader.result
+            let name = date.valueOf();
+            name = name + "." + file.name.split('.')[1]
+    
+            let data = [{ url: base64, nome: name, numeroPatrimonio: numeroPatrimonio }]
+            console.log(data)
+
+            props.saveToServer(data)
+        }
+    
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }
+    }
+
 	/**
 	 * 
 	 */
@@ -203,13 +259,6 @@ class EditarEquipamento extends Component {
 
                                 <Field
                                     component={CustomInput}
-                                    name='equipamento.anoFabricacao'
-                                    label="Ano de Fabricação"
-                                    type='number'
-                                    ref='ano-fabricacao' />
-
-                                <Field
-                                    component={CustomInput}
                                     name='dataAquisicao'
                                     label="Data de Aquisição"
                                     type='date'
@@ -220,9 +269,21 @@ class EditarEquipamento extends Component {
                                     name='numeroPatrimonio'
                                     label="Número de Série"
                                     type='number'
-                                    ref='numero-serie' />
+                                    ref='numeroPatrimonio' />
                             </FormGroup>
                             
+                            <FormControl margin="normal" required={true} fullWidth >
+                                    <InputLabel htmlFor={'fileupload'} className={classes.labelUpload}>Imagens</InputLabel>
+                                    <FilePond
+                                        ref={ref => (this.pond = ref)}
+                                        files={this.state.files}
+                                        allowMultiple={true}
+                                        maxFiles={5}
+                                        className={classes.upload}
+                                        onupdatefiles={(fileItems) => this.handleFiles(fileItems) }
+                                    />
+                                </FormControl>
+
                             <Button
                                 type="submit"
                                 fullWidth
@@ -245,5 +306,5 @@ class EditarEquipamento extends Component {
 
 EditarEquipamento = reduxForm({form: 'EditarEquipamentoForm', destroyOnUnmount: false})(EditarEquipamento)
 const mapStateToProps = state => ({ equipamento: state.equipamento })
-const mapDispatchToProps = dispatch => bindActionCreators({editar, getCategorias, getSubcategorias, buscarEquipamento}, dispatch)
+const mapDispatchToProps = dispatch => bindActionCreators({editar, getCategorias, getSubcategorias, buscarEquipamento, saveToServer}, dispatch)
 export default withRouter(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(EditarEquipamento)))

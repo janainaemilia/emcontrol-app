@@ -170,7 +170,6 @@ class AddEquipament extends Component {
         reader.onerror = function (error) {
           console.log('Error: ', error)
         }
-    
     }
 
     routeChange(route){

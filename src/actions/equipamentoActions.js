@@ -91,7 +91,7 @@ function editarEquipamento(values, url) {
                 if(resp != null){
                     toastr.success('Sucesso', "Equipamento editado com sucesso!")
                     dispatch({ type: 'EQUIPAMENT', payload: resp.data })
-                    dispatch(reload('/meus-equipamentos'))
+                    // dispatch(reload('/meus-equipamentos'))
                 }               
             })
             .catch(e => {

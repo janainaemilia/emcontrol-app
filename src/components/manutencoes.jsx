@@ -45,11 +45,12 @@ const styles = theme => ({
         width: '100%',
         clear: 'both',
         background: '#5f6b750d',
-        height: '355px',
         marginBottom: '55px',
         marginTop: '30px',
         borderRadius: '7px',
-        borderBottom: '3px solid #10536bc4'
+        borderBottom: '3px solid #10536bc4',
+        maxHeight: '600px',
+        minHeight: '500px',
     },
     manutencoes:{
         float:'right',
@@ -57,7 +58,7 @@ const styles = theme => ({
     },
     cardManutencao: {
         float: 'left',
-        marginRight: theme.spacing.unit * 3,
+        marginRight: theme.spacing.unit * 2,
         marginTop: 30,
         marginLeft: '2%',
         minWidth: '250px',
