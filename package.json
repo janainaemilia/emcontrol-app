@@ -12,7 +12,7 @@
     "react-redux-firebase": "^2.3.0",
     "react-redux-toastr": "^7.4.8",
     "react-router": "^5.0.0",
-    "react-scripts": "^0.9.5",
+    "react-scripts": "^5.0.1",
     "redux": "^4.0.1",
     "redux-firestore": "^0.8.0",
     "redux-multi": "^0.1.12",
